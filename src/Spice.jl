@@ -4,7 +4,6 @@ module Spice
 export furnsh,
        unload,
        utc2et,
-       str2et,
        scs2e,
        vsep,
        spkpos,
@@ -12,7 +11,7 @@ export furnsh,
        reclat
 
 
-const sharedLib = "../cspice/lib/spice.so"
+const sharedLib = "/home/abieler/.julia/v0.4/Spice/cspice/lib/spice.so"
 
 function furnsh(KernelFile::ASCIIString)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
@@ -28,10 +27,12 @@ function reclat(a::Vector)
 end
 
 
-function str2et(s::ASCIIString)
-  et = 0.0
-  ccall((:utc2et_c, sharedLib), Float64, (Ptr{Cchar}, Float64), s, et)
+function utc2et(s::ASCIIString)
+  et = Ref{Cdouble}(0.0)
+  ccall((:utc2et_c, sharedLib), Void, (Ptr{Cchar},Ptr{Cdouble}), s, et)
+  return et[]
 end
+
 
 function scs2e(sc::Int64, sclkch::ASCIIString)
   et = Ref{Cdouble}(0.0)
