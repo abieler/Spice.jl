@@ -12,7 +12,8 @@ export furnsh,
        spkpos,
        timout,
        reclat,
-       init_spice
+       init_spice,
+       sharedLib
 
 
 vma = VERSION.major
