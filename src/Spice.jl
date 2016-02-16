@@ -1,5 +1,8 @@
 module Spice
 
+using Requests
+import Requests: get
+
 
 export furnsh,
        unload,
@@ -8,10 +11,15 @@ export furnsh,
        vsep,
        spkpos,
        timout,
-       reclat
+       reclat,
+       init_spice
 
 
-const sharedLib = "/home/abieler/.julia/v0.4/Spice/cspice/lib/spice.so"
+vma = VERSION.major
+vmi = VERSION.minor
+juliaversion = "v$vma.$vmi"
+install_path = joinpath(homedir(), ".julia", juliaversion, "Spice")
+const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
 
 function furnsh(KernelFile::ASCIIString)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
@@ -71,5 +79,75 @@ end
 function vsep(a::Vector, b::Vector)
   ccall((:vsep_c, sharedLib), Float64, (Ptr{Float64}, Ptr{Float64}), a, b)
 end
+
+
+function get_spice()
+root_url = "http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"
+
+@linux_only platform_url = "PC_Linux_GCC_64bit/"
+@osx_only platform_url = "MacIntel_OSX_AppleC_64bit/"
+@windows_only println("Windows not supported")
+
+pkg_name = "packages/cspice.tar.Z"
+
+full_url = root_url * platform_url * pkg_name
+println()
+println(" - Downloading SPICE library:")
+println("   ", full_url)
+print("   This might take a moment...   ")
+cspice_archive = get(full_url)
+println("OK")
+save(cspice_archive, joinpath(install_path, "cspice.tar.Z"))
+nothing
+end
+
+function init_spice()
+  get_spice()
+  cd(install_path)
+  try
+    rm("cspice")
+    rm("cspice.tar.Z")
+  catch
+  end
+  run(`tar -zxf cspice.tar.Z`)
+  rm("cspice.tar.Z")
+  @linux_only compileLinux(install_path)
+  @osx_only compileOSX(install_path)
+end
+
+function compileOSX(path)
+  previousDir = pwd()
+  cd(joinpath(path, "cspice/lib"))
+  run(`ar -x cspice.a`)
+  run(`ar -x csupport.a`)
+  objectFiles = get_object_files(".")
+  run(`gcc -dynamiclib -lm $objectFiles -o spice.dylib`)
+  cd(previousDir)
+  nothing
+end
+
+function compileLinux(path)
+  previousDir = pwd()
+  cd(joinpath(path, "cspice/lib"))
+  run(`ar -x cspice.a`)
+  run(`ar -x csupport.a`)
+  objectFiles = get_object_files(".")
+  run(`gcc -shared -fPIC -lm $objectFiles -o spice.so`)
+  cd(previousDir)
+  nothing
+end
+
+function get_object_files(path)
+
+  objectFiles = AbstractString[]
+  for fileName in readdir(path)
+    if split(fileName, '.')[end] == "o"
+      push!(objectFiles, fileName)
+    end
+  end
+  return objectFiles
+
+end
+
 
 end
