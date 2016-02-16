@@ -123,6 +123,7 @@ function compileOSX(path)
   run(`ar -x csupport.a`)
   objectFiles = get_object_files(".")
   run(`gcc -dynamiclib -lm $objectFiles -o spice.dylib`)
+  run(`rm $objectFiles`)
   cd(previousDir)
   nothing
 end
@@ -134,6 +135,7 @@ function compileLinux(path)
   run(`ar -x csupport.a`)
   objectFiles = get_object_files(".")
   run(`gcc -shared -fPIC -lm $objectFiles -o spice.so`)
+  run(`rm $objectFiles`)
   cd(previousDir)
   nothing
 end
