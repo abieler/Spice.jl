@@ -5,10 +5,12 @@ import Requests: get
 
 
 export furnsh,
+       pxform,
        unload,
        utc2et,
        scs2e,
        vsep,
+       str2et,
        spkpos,
        timout,
        reclat,
@@ -26,6 +28,13 @@ function furnsh(KernelFile::ASCIIString)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
 end
 
+function pxform(from, to, et)
+  rotMat = zeros(Float64, 3,3)
+  ccall((:pxform_c, sharedLib), Void, (Ptr{Cchar}, Ptr{Cchar}, Cdouble, Ptr{Cdouble}),
+        from, to, et, rotMat)
+  return rotMat
+end
+
 function reclat(a::Vector)
   r = Ref{Cdouble}(0.0)
   lon = Ref{Cdouble}(0.0)
@@ -35,6 +44,11 @@ function reclat(a::Vector)
   return r[], lon[], lat[]
 end
 
+function str2et(s::AbstractString)
+  et = Ref{Cdouble}(0.0)
+  ccall((:utc2et_c, sharedLib), Float64, (Ptr{Cchar}, Ptr{Cdouble}), s, et)
+  return et[]
+end
 
 function utc2et(s::ASCIIString)
   et = Ref{Cdouble}(0.0)
