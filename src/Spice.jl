@@ -22,7 +22,8 @@ vma = VERSION.major
 vmi = VERSION.minor
 juliaversion = "v$vma.$vmi"
 install_path = joinpath(homedir(), ".julia", juliaversion, "Spice")
-const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
+@linux_only const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
+@osx_only const sharedLib = joinpath(install_path, "cspice/lib/spice.dylib")
 
 function furnsh(KernelFile::ASCIIString)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
