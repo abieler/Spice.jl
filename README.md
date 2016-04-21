@@ -2,8 +2,11 @@
 
 Wrapper around the NAIF cspice API, which is an observation geometry information system used in
 the planetary sciences and astro community. NO warranty, Spice.jl is not an official product of JPL.
-
 http://naif.jpl.nasa.gov/naif/
+
+Spice.jl only supports 64 bit OSX or Linux.
+
+
 
 
 ##Installation
