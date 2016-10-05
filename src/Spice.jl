@@ -1,3 +1,4 @@
+__precompile__()
 module Spice
 
 using Requests
@@ -22,10 +23,16 @@ vma = VERSION.major
 vmi = VERSION.minor
 juliaversion = "v$vma.$vmi"
 install_path = joinpath(homedir(), ".julia", juliaversion, "Spice")
-@linux_only const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
-@osx_only const sharedLib = joinpath(install_path, "cspice/lib/spice.dylib")
 
-function furnsh(KernelFile::ASCIIString)
+@static if is_linux()
+  const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
+end
+
+@static if is_apple()
+  const sharedLib = joinpath(install_path, "cspice/lib/spice.dylib")
+end
+
+function furnsh(KernelFile::String)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
 end
 
@@ -86,11 +93,6 @@ function unload(KernelFile::AbstractString)
   ccall((:furnsh_c, sharedLib),Void,(Ptr{Cchar},),KernelFile)
 end
 
-function utc2et(s::AbstractString)
-  et = 0.0
-  ccall((:utc2et_c, sharedLib), Float64, (Ptr{Cchar}, Float64), s, et)
-end
-
 
 function vsep(a::Vector, b::Vector)
   ccall((:vsep_c, sharedLib), Float64, (Ptr{Float64}, Ptr{Float64}), a, b)
@@ -100,9 +102,15 @@ end
 function get_spice()
 root_url = "http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"
 
-@linux_only platform_url = "PC_Linux_GCC_64bit/"
-@osx_only platform_url = "MacIntel_OSX_AppleC_64bit/"
-@windows_only println("Windows not supported")
+@static if is_linux()
+  platform_url = "PC_Linux_GCC_64bit/"
+end
+@static if is_apple()
+  platform_url = "MacIntel_OSX_AppleC_64bit/"
+end
+@static if is_windows()
+  println("Windows not supported")
+end
 
 pkg_name = "packages/cspice.tar.Z"
 
@@ -127,8 +135,12 @@ function init_spice()
   end
   run(`tar -zxf cspice.tar.Z`)
   rm("cspice.tar.Z")
-  @linux_only compileLinux(install_path)
-  @osx_only compileOSX(install_path)
+  @static if is_linux() 
+    compileLinux(install_path)
+  end
+  @static if is_apple()
+    compileOSX(install_path)
+  end
 end
 
 function compileOSX(path)
