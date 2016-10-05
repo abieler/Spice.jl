@@ -1,4 +1,5 @@
 __precompile__()
+
 module Spice
 
 using Requests
