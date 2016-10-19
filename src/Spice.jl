@@ -14,15 +14,15 @@ juliaversion = "v$vma.$vmi"
 install_path = joinpath(homedir(), ".julia", juliaversion, "Spice")
 
 @static if is_linux()
-  const sharedLib = joinpath(install_path, "cspice/lib/spice.so")
+  const sharedLib = joinpath(install_path, "cspice", "lib", "spice.so")
 end
 
 @static if is_apple()
-  const sharedLib = joinpath(install_path, "cspice/lib/spice.dylib")
+  const sharedLib = joinpath(install_path, "cspice", "lib", "spice.dylib")
 end
 
 @static if is_windows()
-  const sharedLib = joinpath(install_path, "cspice/lib/spice.dll")
+  const sharedLib = joinpath(install_path, "cspice", "lib", "spice.dll")
 end
 
 

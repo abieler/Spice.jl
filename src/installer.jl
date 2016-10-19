@@ -59,7 +59,7 @@ end
 
 function compileOSX(path)
   previousDir = pwd()
-  cd(joinpath(path, "cspice/lib"))
+  cd(joinpath(path, "cspice", "lib"))
   run(`ar -x cspice.a`)
   run(`ar -x csupport.a`)
   objectFiles = get_object_files(".")
@@ -72,7 +72,7 @@ end
 
 function compileLinux(path)
   previousDir = pwd()
-  cd(joinpath(path, "cspice/lib"))
+  cd(joinpath(path, "cspice", "lib"))
   run(`ar -x cspice.a`)
   run(`ar -x csupport.a`)
   objectFiles = get_object_files(".")
@@ -86,7 +86,7 @@ end
 function compileWin(path)
   mkdir(joinpath(path, "cspice"))
   mkdir(joinpath(path, "cspice", "lib"))
-  cp(joinpath(path, "spice.dll"), joinpath(path, "cspice", "lib", "spice.dll" ))
+  cp(joinpath(path, "cspice.dll"), joinpath(path, "cspice", "lib", "spice.dll" ))
   nothing
 end
 
